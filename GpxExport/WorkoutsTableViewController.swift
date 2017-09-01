@@ -3,70 +3,70 @@ import HealthKit
 import WatchKit
 
 class WorkoutsTableViewController: UITableViewController {
-  
+
   private enum WorkoutsSegues: String {
     case showCreateWorkout
     case finishedCreatingWorkout
   }
-  
+
     lazy private var workoutStore: WorkoutDataStore = {
         return WorkoutDataStore()
     }()
-    
+
   private var workouts: [HKWorkout]?
-  
+
   private let prancerciseWorkoutCellID = "PrancerciseWorkoutCell"
-  
+
   lazy var dateFormatter:DateFormatter = {
     let formatter = DateFormatter()
     formatter.timeStyle = .short
     formatter.dateStyle = .medium
     return formatter
   }()
-    
+
   override func viewDidLoad() {
     super.viewDidLoad()
     self.clearsSelectionOnViewWillAppear = false
   }
-  
+
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     reloadWorkouts()
   }
-    
+
   func reloadWorkouts() {
-    
+
     workoutStore.loadWorkouts() { (workouts, error) in
       self.workouts = workouts
       self.tableView.reloadData()
     }
   }
-  
+
   //MARK: UITableView DataSource
   override func numberOfSections(in tableView: UITableView) -> Int {
     return 1
   }
-  
+
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    
+
     guard let workouts = workouts else {
       return 0
     }
-    
+
     return workouts.count
   }
-    
-   
+
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print(indexPath);
         guard let workouts = self.workouts else {
             return;
         }
-        
+
         if (indexPath.row >= workouts.count){
             return;
         }
-        
+
         print(indexPath.row)
         let workout = workouts[indexPath.row];
         let workout_name: String = {
@@ -99,7 +99,7 @@ class WorkoutsTableViewController: UITableViewController {
 
         workoutStore.heartRate(for: workouts[indexPath.row]){
             (rates, error) in
- 
+
             guard let keyedRates = rates, error == nil else {
                 print(error as Any);
                 return
@@ -148,26 +148,26 @@ class WorkoutsTableViewController: UITableViewController {
                     self.present(activityViewController, animated: true, completion: nil)
                 }
             }
-            
+
         };
     }
-  
+
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    
+
     guard let workouts = workouts else {
       fatalError("CellForRowAtIndexPath should never get called if there are no workouts")
     }
-    
+
     //1. Get a cell to display the workout in.
     let cell = tableView.dequeueReusableCell(withIdentifier: prancerciseWorkoutCellID,
                                              for: indexPath)
-    
+
     //2. Get the workout corresponding to this row.
     let workout = workouts[indexPath.row]
-    
+
     //3. Show the workout's start date in the label.
     cell.textLabel?.text = dateFormatter.string(from: workout.startDate)
-    
+
     //4. Show the Calorie burn in the lower label.
     if let caloriesBurned = workout.totalEnergyBurned?.doubleValue(for: HKUnit.kilocalorie()) {
       let formattedCalories = String(format: "CaloriesBurned: %.2f", caloriesBurned)
@@ -175,7 +175,7 @@ class WorkoutsTableViewController: UITableViewController {
     } else {
       cell.detailTextLabel?.text = nil
     }
-    
+
     return cell
   }
 }
