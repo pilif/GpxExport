@@ -24,6 +24,12 @@ class WorkoutsTableViewController: UITableViewController {
     return formatter
   }()
 
+  lazy var filenameDateFormatter: DateFormatter = {
+    let formatter = DateFormatter();
+    formatter.dateFormat = "yyyy-MM-dd hh.mm.ss"
+    return formatter;
+  }()
+
   override func viewDidLoad() {
     super.viewDidLoad()
     self.clearsSelectionOnViewWillAppear = false
@@ -78,9 +84,10 @@ class WorkoutsTableViewController: UITableViewController {
             }
         }()
         let workout_title = "\(workout_name) - \(self.dateFormatter.string(from: workout.startDate))"
+        let file_name = "\(self.filenameDateFormatter.string(from: workout.startDate)) - \(workout_name)"
 
         let targetURL = URL(fileURLWithPath: NSTemporaryDirectory())
-            .appendingPathComponent(workout_title)
+            .appendingPathComponent(file_name)
             .appendingPathExtension("gpx")
 
         let file: FileHandle
