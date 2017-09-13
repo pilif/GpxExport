@@ -49,7 +49,12 @@ class WorkoutDataStore {
             }
             
             guard let routeSamples: [HKWorkoutRoute] = samples as? [HKWorkoutRoute] else { print("No route samples"); return }
-            
+
+            if (routeSamples.count == 0){
+                completion([CLLocation](), true, nil)
+                return;
+            }
+
             for routeSample: HKWorkoutRoute in routeSamples {
                 
                 let locationQuery: HKWorkoutRouteQuery = HKWorkoutRouteQuery(route: routeSample) { _, locationResults, done, error in
