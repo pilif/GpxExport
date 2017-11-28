@@ -38,7 +38,7 @@ class WorkoutDataStore {
         healthStore.execute(heartRateQuery)
     }
     
-    public func route(for workout: HKWorkout, completion: @escaping (([CLLocation]?, Bool, Error?) -> Swift.Void)){
+    public func route(for workout: HKWorkout, completion: @escaping (([CLLocation]?, Error?) -> Swift.Void)){
         let routeType = HKSeriesType.workoutRoute();
         let p = HKQuery.predicateForObjects(from: workout)
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
@@ -53,10 +53,11 @@ class WorkoutDataStore {
             guard let routeSamples: [HKWorkoutRoute] = samples as? [HKWorkoutRoute] else { print("No route samples"); return }
 
             if (routeSamples.count == 0){
-                completion([CLLocation](), true, nil)
+                completion([CLLocation](), nil)
                 return;
             }
-            var allDone = 0
+            var sampleCounter = 0
+            var routeLocations:[CLLocation] = []
 
             for routeSample: HKWorkoutRoute in routeSamples {
                 
@@ -64,25 +65,29 @@ class WorkoutDataStore {
                     guard locationResults != nil else {
                         print("Error occured while querying for locations: \(error?.localizedDescription ?? "")")
                         DispatchQueue.main.async {
-                            completion(nil, done, error)
+                            completion(nil, error)
                         }
                         return
                     }
 
                     if done {
-                        allDone += 1
-                        if allDone != routeSamples.count {
-                            DispatchQueue.main.async {
-                                completion(locationResults, false, error)
+                        sampleCounter += 1
+                        if sampleCounter != routeSamples.count {
+                            if let locations = locationResults {
+                                routeLocations.append(contentsOf: locations)
                             }
                         } else {
-                            DispatchQueue.main.async {
-                                completion(locationResults, true, error)
+                            if let locations = locationResults {
+                                routeLocations.append(contentsOf: locations)
+                                let sortedLocations = routeLocations.sorted(by: {$0.timestamp > $1.timestamp})
+                                DispatchQueue.main.async {
+                                    completion(sortedLocations, error)
+                                }
                             }
                         }
                     } else {
-                        DispatchQueue.main.async {
-                            completion(locationResults, false, error)
+                        if let locations = locationResults {
+                            routeLocations.append(contentsOf: locations)
                         }
                     }
                 }
