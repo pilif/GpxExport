@@ -12,10 +12,10 @@ class WorkoutDataStore {
         var allSamples = Array<HKQuantitySample>()
         
         let hrType = HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRate)!
-        let p = HKQuery.predicateForObjects(from: workout)
+        let predicate = HKQuery.predicateForSamples(withStart: workout.startDate, end: workout.endDate, options: HKQueryOptions.strictStartDate)
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
 
-        let heartRateQuery = HKSampleQuery(sampleType: hrType, predicate: p, limit: HKObjectQueryNoLimit, sortDescriptors: [sortDescriptor]) {
+        let heartRateQuery = HKSampleQuery(sampleType: hrType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: [sortDescriptor]) {
             (query, samples, error) in
             
             guard let heartRateSamples: [HKQuantitySample] = samples as? [HKQuantitySample], error == nil else {
@@ -38,7 +38,7 @@ class WorkoutDataStore {
         healthStore.execute(heartRateQuery)
     }
     
-    public func route(for workout: HKWorkout, completion: @escaping (([CLLocation]?, Bool, Error?) -> Swift.Void)){
+    public func route(for workout: HKWorkout, completion: @escaping (([CLLocation]?, Error?) -> Swift.Void)){
         let routeType = HKSeriesType.workoutRoute();
         let p = HKQuery.predicateForObjects(from: workout)
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
@@ -53,9 +53,11 @@ class WorkoutDataStore {
             guard let routeSamples: [HKWorkoutRoute] = samples as? [HKWorkoutRoute] else { print("No route samples"); return }
 
             if (routeSamples.count == 0){
-                completion([CLLocation](), true, nil)
+                completion([CLLocation](), nil)
                 return;
             }
+            var sampleCounter = 0
+            var routeLocations:[CLLocation] = []
 
             for routeSample: HKWorkoutRoute in routeSamples {
                 
@@ -63,13 +65,30 @@ class WorkoutDataStore {
                     guard locationResults != nil else {
                         print("Error occured while querying for locations: \(error?.localizedDescription ?? "")")
                         DispatchQueue.main.async {
-                            completion(nil, done, error)
+                            completion(nil, error)
                         }
                         return
                     }
-                    
-                    DispatchQueue.main.async {
-                        completion(locationResults, done, error)
+
+                    if done {
+                        sampleCounter += 1
+                        if sampleCounter != routeSamples.count {
+                            if let locations = locationResults {
+                                routeLocations.append(contentsOf: locations)
+                            }
+                        } else {
+                            if let locations = locationResults {
+                                routeLocations.append(contentsOf: locations)
+                                let sortedLocations = routeLocations.sorted(by: {$0.timestamp > $1.timestamp})
+                                DispatchQueue.main.async {
+                                    completion(sortedLocations, error)
+                                }
+                            }
+                        }
+                    } else {
+                        if let locations = locationResults {
+                            routeLocations.append(contentsOf: locations)
+                        }
                     }
                 }
                 

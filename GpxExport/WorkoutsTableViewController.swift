@@ -123,7 +123,7 @@ class WorkoutsTableViewController: UITableViewController {
             )
 
             self.workoutStore.route(for: workouts[indexPath.row]){
-                (maybe_locations, done, error) in
+                (maybe_locations, error) in
                 guard let locations = maybe_locations, error == nil else {
                     print(error as Any);
                     file.closeFile()
@@ -142,21 +142,17 @@ class WorkoutsTableViewController: UITableViewController {
                             .data(using: .utf8)!
                     )
                 }
-                if (done){
-                    file.write("</trkseg></trk></gpx>".data(using: .utf8)!)
-                    file.closeFile()
+                file.write("</trkseg></trk></gpx>".data(using: .utf8)!)
+                file.closeFile()
 
-                    let activityViewController = UIActivityViewController(
-                        activityItems: [targetURL],
-                        applicationActivities: nil)
-                    if let popoverPresentationController = activityViewController.popoverPresentationController {
-                        popoverPresentationController.barButtonItem = nil
-                    }
-                    self.present(activityViewController, animated: true, completion: nil)
+                let activityViewController = UIActivityViewController( activityItems: [targetURL],
+                                                                       applicationActivities: nil)
+                if let popoverPresentationController = activityViewController.popoverPresentationController {
+                    popoverPresentationController.barButtonItem = nil
                 }
+                self.present(activityViewController, animated: true, completion: nil)
             }
-
-        };
+        }
     }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
