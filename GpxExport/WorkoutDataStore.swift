@@ -79,7 +79,7 @@ class WorkoutDataStore {
                         } else {
                             if let locations = locationResults {
                                 routeLocations.append(contentsOf: locations)
-                                let sortedLocations = routeLocations.sorted(by: {$0.timestamp > $1.timestamp})
+                                let sortedLocations = routeLocations.sorted(by: {$0.timestamp < $1.timestamp})
                                 DispatchQueue.main.async {
                                     completion(sortedLocations, error)
                                 }
