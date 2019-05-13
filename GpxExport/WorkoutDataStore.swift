@@ -105,6 +105,7 @@ class WorkoutDataStore {
             HKQuery.predicateForWorkouts(with: .running),
             HKQuery.predicateForWorkouts(with: .cycling),
             HKQuery.predicateForWorkouts(with: .swimming),
+            HKQuery.predicateForWorkouts(with: .hiking)
             ])
         
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
