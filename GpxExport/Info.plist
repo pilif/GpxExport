@@ -4,8 +4,6 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
-	<key>NSHealthShareUsageDescription</key>
-	<string>$(PRODUCT_NAME) needs to be able to read your workout related health data in order to export GPX files</string>
 	<key>CFBundleDisplayName</key>
 	<string>GPX Export</string>
 	<key>CFBundleExecutable</key>
@@ -24,6 +22,8 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSHealthShareUsageDescription</key>
+	<string>$(PRODUCT_NAME) needs to be able to read your workout related health data in order to export GPX files</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -48,16 +48,16 @@
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>
-			<key>UTTypeIdentifier</key>
-			<string>com.topografix.gpx</string>
-			<key>UTTypeReferenceURL</key>
-			<string>http://www.topografix.com/GPX/1/1</string>
-			<key>UTTypeDescription</key>
-			<string>GPS Exchange Format (GPX)</string>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.xml</string>
 			</array>
+			<key>UTTypeDescription</key>
+			<string>GPS Exchange Format (GPX)</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.topografix.gpx</string>
+			<key>UTTypeReferenceURL</key>
+			<string>http://www.topografix.com/GPX/1/1</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
